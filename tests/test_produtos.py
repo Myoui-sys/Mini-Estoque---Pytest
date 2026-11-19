@@ -6,3 +6,13 @@ from estoque.produtos import (proximo_id, buscar_por_nome, cadastrar_produto, ca
 # lista vazia
 # lista com produtos
 # depois de remover um produto do meio da lista
+def test_proximo_id_apos_remocao():
+    produtos = [
+        {"id": 1, "nome": "Caneta"},
+        {"id": 3, "nome": "Borracha"}
+    ]
+
+    resultado = proximo_id(produtos)
+
+    assert resultado == 4
+
