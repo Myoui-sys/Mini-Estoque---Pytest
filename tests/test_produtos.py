@@ -55,7 +55,7 @@ def test_obter_produto():
 
     assert resultado["nome"] == "Caderno"
 
-# Função de tete para remover produto
+# Função de teste para remover produto
 def test_remover_produto():
     produtos = [{"id": 1, "nome": "Caneta"}]
 
@@ -64,6 +64,7 @@ def test_remover_produto():
     assert resultado["id"] == 1
     assert len(produtos) == 0
 
+# Função de teste para repor estoque
 def test_repor_estoque():
     produtos = [{"id": 1, "nome": "Caneta", "quantidade": 10}]
 
@@ -71,4 +72,20 @@ def test_repor_estoque():
 
     assert resultado["quantidade"] == 15
 
-    
+# Função de teste para retirar estoque de um produto, sem deixar negativo
+def test_retirar_estoque_maior_que_disponivel():
+    produtos = [{"id": 1, "nome": "Caneta", "quantidade": 5}]
+
+    with pytest.raises(ValueError):
+        retirar_estoque(produtos, 1, 10)
+
+# Função de teste para calcular o valor total do estoque soma de valor * quantidade de cada produto
+def test_valor_total_estoque():
+    produtos = [
+        {"preco": 50.0, "quantidade": 2},
+        {"preco": 5.0, "quantidade": 10}
+    ]
+
+    resultado = valor_total_estoque(produtos)
+
+    assert resultado == 150.0
