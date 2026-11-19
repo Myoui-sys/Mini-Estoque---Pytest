@@ -14,13 +14,19 @@ def test_proximo_id_apos_remocao():
     assert resultado == 4
 
 # Função de teste para cadastrar produto
-def test_cadastrar_produto():
+@pytest.mark.parametrize("nome, preco, quantidade", [
+    ("Lápis", 1.0, 2),
+    ("Caderno", 15.0, 5),
+    ("Caneta", 2.5, 10)
+])
+def test_cadastrar_produto(nome, preco, quantidade):
     produtos = []
 
-    resultado = cadastrar_produto(produtos, "Lápis", 1.0, 2)
+    resultado = cadastrar_produto(produtos, nome, preco, quantidade)
 
-    assert resultado["nome"] == "Lápis"
-    assert resultado["preco"] == 1.0
-    assert resultado["quantidade"] == 2
+    assert resultado["nome"] == nome
+    assert resultado["preco"] == preco
+    assert resultado["quantidade"] == quantidade
     assert resultado["id"] == 1
     assert len(produtos) == 1
+
