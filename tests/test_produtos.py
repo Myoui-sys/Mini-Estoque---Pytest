@@ -89,3 +89,26 @@ def test_valor_total_estoque():
     resultado = valor_total_estoque(produtos)
 
     assert resultado == 150.0
+
+# Função de teste para calcular o desconto
+@pytest.mark.parametrize("percentual, esperado", [
+    (0, 100),
+    (10, 90),
+    (50, 50),
+    (100, 0)
+])
+def test_calcular_desconto(percentual, esperado):
+    resultado = calcular_desconto(100, percentual)
+    assert resultado == esperado
+
+# Função de testar o limite de produtos que aparecem com o estoque baixo
+def test_estoque_baixo():
+    produtos = [
+        {"nome": "Caneta", "quantidade": 5},
+        {"nome": "Caderno", "quantidade": 3},
+        {"nome": "Lápis", "quantidade": 10}
+    ]
+
+    resultado = estoque_baixo(produtos)
+
+    assert len(resultado) == 2

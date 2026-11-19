@@ -94,7 +94,7 @@ Failed: DID NOT RAISE ValueError
 **Causa provável:**  
 A função não possui uma verificação para impedir que a quantidade solicitada seja maior que a quantidade disponível no estoque.
 
-## BUG 003 — Cálculo do valor total do estoque (Soma do preço * quantidade de cada produto)
+## BUG 004 — Cálculo do valor total do estoque (Soma do preço * quantidade de cada produto)
 
 - **Função:** `valor_total_estoque()`
 - **Status:** Defeito identificado.
@@ -115,3 +115,48 @@ FAILED tests/test_produtos.py::test_valor_total_estoque - assert 55.0 == 150.0
 
 **Causa provável:**  
 A função não multiplica o preço pela quantidade de cada produto antes de somar os valores.
+
+## BUG 005 — Calcular o desconto
+
+- **Função:** `calcular_desconto()`
+- **Status:** Defeito identificado.
+
+**Descrição:**  
+A função não permite aplicar um desconto de 100%, embora a regra estabeleça que percentuais entre 0 e 100, inclusive, devem ser aceitos.
+
+**Cenário de teste:**  
+Foi aplicado um desconto de 100% sobre um produto de R$ 100,00. O resultado esperado era R$ 0,00, sem gerar exceção.
+
+**Evidência do Pytest:**
+```text
+FAILED tests/test_produtos.py::test_calcular_desconto[100-0] - ValueError: Percentual deve estar entre 0 e 100.
+```
+
+**Resultado:**  
+<escape>O teste falhou porque a função lançou um ValueError ao receber 100%, impedindo a aplicação do desconto total.</escape>
+
+**Causa provável:**  
+A condição de validação utiliza percentual >= 100, rejeitando o valor 100, que deveria ser permitido.
+
+## BUG 006 — Estoque baixo
+
+- **Função:** `estoque_baixo()`
+- **Status:** Defeito identificado.
+
+**Descrição:**  
+A função considera apenas produtos com quantidade menor que o limite, ignorando produtos com quantidade exatamente igual a ele.
+
+**Cenário de teste:**  
+Foram cadastrados três produtos: uma Caneta com 5 unidades, um Caderno com 3 unidades e um Lápis com 10 unidades. Considerando o limite padrão de 5, eram esperados dois produtos na lista de estoque baixo.
+
+**Evidência do Pytest:**
+```text
+FAILED tests/test_produtos.py::test_estoque_baixo
+AssertionError: assert 1 == 2
+```
+
+**Resultado:**  
+<escape>O teste falhou porque a função retornou apenas um produto, quando deveria retornar dois.</escape>
+
+**Causa provável:**  
+A condição utiliza < limite em vez de <= limite, deixando de considerar produtos cuja quantidade seja exatamente igual ao limite.
