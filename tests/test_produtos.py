@@ -30,10 +30,36 @@ def test_cadastrar_produto(nome, preco, quantidade):
     assert resultado["id"] == 1
     assert len(produtos) == 1
 
-# Função de diferenciar maiúscula por minúscula
-def test_buscar_por_nome_maiuscula_minuscula():
+# Função de teste para diferenciar maiúscula por minúscula e parcial
+@pytest.mark.parametrize("nome", [
+    "caneta",  
+    "CANETA",  
+    "Caneta",  
+    "neta"
+])
+def test_buscar_por_nome(nome):
     produtos = [{"nome": "Caneta"}]
 
-    resultado = buscar_por_nome(produtos, "caneta")
+    resultado = buscar_por_nome(produtos, nome)
 
     assert resultado[0]["nome"] == "Caneta"
+
+# Função de buscar produto por ID
+def test_obter_produto():
+    produtos = [
+        {"id": 1, "nome": "Caneta"},
+        {"id": 2, "nome": "Caderno"}
+    ]
+
+    resultado = _obter(produtos, 2)
+
+    assert resultado["nome"] == "Caderno"
+
+# Função de tete para remover produto
+def test_remover_produto():
+    produtos = [{"id": 1, "nome": "Caneta"}]
+
+    resultado = remover_produto(produtos, 1)
+
+    assert resultado["id"] == 1
+    assert len(produtos) == 0
