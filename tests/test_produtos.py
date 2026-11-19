@@ -63,3 +63,12 @@ def test_remover_produto():
 
     assert resultado["id"] == 1
     assert len(produtos) == 0
+
+def test_repor_estoque():
+    produtos = [{"id": 1, "nome": "Caneta", "quantidade": 10}]
+
+    resultado = repor_estoque(produtos, 1, 5)
+
+    assert resultado["quantidade"] == 15
+
+    
