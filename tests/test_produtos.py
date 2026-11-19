@@ -30,3 +30,10 @@ def test_cadastrar_produto(nome, preco, quantidade):
     assert resultado["id"] == 1
     assert len(produtos) == 1
 
+# Função de diferenciar maiúscula por minúscula
+def test_buscar_por_nome_maiuscula_minuscula():
+    produtos = [{"nome": "Caneta"}]
+
+    resultado = buscar_por_nome(produtos, "caneta")
+
+    assert resultado[0]["nome"] == "Caneta"
