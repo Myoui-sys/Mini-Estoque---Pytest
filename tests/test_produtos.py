@@ -1,15 +1,48 @@
 import pytest
 
-from estoque.produtos import (proximo_id, buscar_por_nome, cadastrar_produto, calcular_desconto, estoque_baixo, remover_produto, repor_estoque, retirar_estoque, validar_nome, validar_preco, validar_quantidade, valor_total_estoque, _obter)
+from estoque.produtos import (proximo_id, buscar_por_nome, cadastrar_produto, calcular_desconto, estoque_baixo, remover_produto, repor_estoque, retirar_estoque, valor_total_estoque, _obter)
 
-# Função de teste para próximo ID (não pode se repetir) após um produto ser removido
-def test_proximo_id_apos_remocao():
-    produtos = [
+# FIXTURES
+
+@pytest.fixture
+def produtos():
+    # Prepara produtos para testes de partição de equivalência,
+    # valor-limite e cenários positivos e negativos.
+    return [
+        # Valor-limite: quantidade exatamente no limite (5)
+        {"id": 1, "nome": "Caneta", "preco": 2.5, "quantidade": 5},
+
+        # Partição de equivalência: estoque abaixo do limite
+        {"id": 2, "nome": "Caderno", "preco": 15.0, "quantidade": 3},
+
+        # Partição de equivalência: estoque acima do limite
+        {"id": 3, "nome": "Lápis", "preco": 1.0, "quantidade": 10},
+
+        # Valor-limite mínimo: estoque zerado (permitido)
+        {"id": 4, "nome": "Borracha", "preco": 2.0, "quantidade": 0},
+
+        # Valor-limite: uma unidade acima do limite
+        {"id": 5, "nome": "Régua", "preco": 5.0, "quantidade": 6}
+    ]
+
+@pytest.fixture
+def produtos_vazios():
+    # Prepara uma lista vazia para os testes de cadastro.
+    return []
+
+@pytest.fixture
+def produtos_com_id_removido():
+    # Simula uma lista em que um produto foi removido,
+    # mantendo os IDs 1 e 3.
+    return [
         {"id": 1, "nome": "Caneta"},
         {"id": 3, "nome": "Borracha"}
     ]
 
-    resultado = proximo_id(produtos)
+# Função de teste para próximo ID (não pode se repetir) após um produto ser removido
+def test_proximo_id_apos_remocao(produtos_com_id_removido):
+
+    resultado = proximo_id(produtos_com_id_removido)
 
     assert resultado == 4
 
@@ -19,76 +52,63 @@ def test_proximo_id_apos_remocao():
     ("Caderno", 15.0, 5),
     ("Caneta", 2.5, 10)
 ])
-def test_cadastrar_produto(nome, preco, quantidade):
-    produtos = []
+def test_cadastrar_produto(produtos_vazios, nome, preco, quantidade):
 
-    resultado = cadastrar_produto(produtos, nome, preco, quantidade)
+    resultado = cadastrar_produto(produtos_vazios, nome, preco, quantidade)
 
     assert resultado["nome"] == nome
     assert resultado["preco"] == preco
     assert resultado["quantidade"] == quantidade
     assert resultado["id"] == 1
-    assert len(produtos) == 1
+    assert len(produtos_vazios) == 1
 
 # Função de teste para diferenciar maiúscula por minúscula e parcial
 @pytest.mark.parametrize("nome", [
-    "caneta",  
-    "CANETA",  
-    "Caneta",  
+    "caneta",
+    "CANETA",
+    "Caneta",
     "neta"
 ])
-def test_buscar_por_nome(nome):
-    produtos = [{"nome": "Caneta"}]
+def test_buscar_por_nome(produtos, nome):
 
     resultado = buscar_por_nome(produtos, nome)
 
     assert resultado[0]["nome"] == "Caneta"
 
 # Função de buscar produto por ID
-def test_obter_produto():
-    produtos = [
-        {"id": 1, "nome": "Caneta"},
-        {"id": 2, "nome": "Caderno"}
-    ]
+def test_obter_produto(produtos):
 
     resultado = _obter(produtos, 2)
 
     assert resultado["nome"] == "Caderno"
 
 # Função de teste para remover produto
-def test_remover_produto():
-    produtos = [{"id": 1, "nome": "Caneta"}]
+def test_remover_produto(produtos):
 
     resultado = remover_produto(produtos, 1)
 
     assert resultado["id"] == 1
-    assert len(produtos) == 0
+    assert len(produtos) == 4
 
 # Função de teste para repor estoque
-def test_repor_estoque():
-    produtos = [{"id": 1, "nome": "Caneta", "quantidade": 10}]
+def test_repor_estoque(produtos):
 
     resultado = repor_estoque(produtos, 1, 5)
 
-    assert resultado["quantidade"] == 15
+    assert resultado["quantidade"] == 10
 
 # Função de teste para retirar estoque de um produto, sem deixar negativo
-def test_retirar_estoque_maior_que_disponivel():
-    produtos = [{"id": 1, "nome": "Caneta", "quantidade": 5}]
+def test_retirar_estoque_maior_que_disponivel(produtos):
 
     with pytest.raises(ValueError):
         retirar_estoque(produtos, 1, 10)
 
-# Função de teste para calcular o valor total do estoque soma de valor * quantidade de cada produto
-def test_valor_total_estoque():
-    produtos = [
-        {"preco": 50.0, "quantidade": 2},
-        {"preco": 5.0, "quantidade": 10}
-    ]
+# Função de teste para calcular o valor total do estoque
+def test_valor_total_estoque(produtos):
 
     resultado = valor_total_estoque(produtos)
 
-    assert resultado == 150.0
+    assert resultado == 116.5
 
 # Função de teste para calcular o desconto
 @pytest.mark.parametrize("percentual, esperado", [
@@ -98,17 +118,14 @@ def test_valor_total_estoque():
     (100, 0)
 ])
 def test_calcular_desconto(percentual, esperado):
+
     resultado = calcular_desconto(100, percentual)
+
     assert resultado == esperado
 
 # Função de testar o limite de produtos que aparecem com o estoque baixo
-def test_estoque_baixo():
-    produtos = [
-        {"nome": "Caneta", "quantidade": 5},
-        {"nome": "Caderno", "quantidade": 3},
-        {"nome": "Lápis", "quantidade": 10}
-    ]
+def test_estoque_baixo(produtos):
 
     resultado = estoque_baixo(produtos)
 
-    assert len(resultado) == 2
+    assert len(resultado) == 3
