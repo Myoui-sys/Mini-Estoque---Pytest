@@ -6,23 +6,21 @@ from estoque.produtos import (proximo_id, buscar_por_nome, cadastrar_produto, ca
 
 @pytest.fixture
 def produtos():
-    # Prepara produtos para testes de partição de equivalência,
-    # valor-limite e cenários positivos e negativos.
     return [
-        # Valor-limite: quantidade exatamente no limite (5)
-        {"id": 1, "nome": "Caneta", "preco": 2.5, "quantidade": 5},
+        # Valor-limite: uma unidade abaixo do limite (4)
+        {"id": 1, "nome": "Caneta", "preco": 2.5, "quantidade": 4},
 
-        # Partição de equivalência: estoque abaixo do limite
-        {"id": 2, "nome": "Caderno", "preco": 15.0, "quantidade": 3},
+        # Valor-limite: exatamente no limite (5)
+        {"id": 2, "nome": "Caderno", "preco": 15.0, "quantidade": 5},
 
-        # Partição de equivalência: estoque acima do limite
-        {"id": 3, "nome": "Lápis", "preco": 1.0, "quantidade": 10},
+        # Valor-limite: uma unidade acima do limite (6)
+        {"id": 3, "nome": "Lápis", "preco": 1.0, "quantidade": 6},
 
-        # Valor-limite mínimo: estoque zerado (permitido)
+        # Valor-limite mínimo: estoque zerado
         {"id": 4, "nome": "Borracha", "preco": 2.0, "quantidade": 0},
 
-        # Valor-limite: uma unidade acima do limite
-        {"id": 5, "nome": "Régua", "preco": 5.0, "quantidade": 6}
+        # Partição de equivalência: estoque distante do limite
+        {"id": 5, "nome": "Régua", "preco": 5.0, "quantidade": 20}
     ]
 
 @pytest.fixture
@@ -92,10 +90,9 @@ def test_remover_produto(produtos):
 
 # Função de teste para repor estoque
 def test_repor_estoque(produtos):
+    produto = repor_estoque(produtos, 1, 5)
 
-    resultado = repor_estoque(produtos, 1, 5)
-
-    assert resultado["quantidade"] == 10
+    assert produto["quantidade"] == 9
 
 # Função de teste para retirar estoque de um produto, sem deixar negativo
 def test_retirar_estoque_maior_que_disponivel(produtos):
@@ -108,7 +105,7 @@ def test_valor_total_estoque(produtos):
 
     resultado = valor_total_estoque(produtos)
 
-    assert resultado == 116.5
+    assert resultado == 191.0
 
 # Função de teste para calcular o desconto
 @pytest.mark.parametrize("percentual, esperado", [
